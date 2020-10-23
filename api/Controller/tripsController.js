@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
   exports.getAllTrips = (req, res) => {
       console.log('All trips')
       let trips = Trip.find();
-      return res.send(trips);
+      return res.send("trips");
   }
 
   exports.getTrip = (req, res) => {
