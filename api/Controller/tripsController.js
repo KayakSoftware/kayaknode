@@ -1,9 +1,10 @@
 var mongoose = require('mongoose'),
-  Trip = mongoose.model('Trips');
+  Trip = mongoose.model('trips');
 
   exports.getAllTrips = (req, res) => {
       console.log('All trips')
-      return res.send('All trips')
+      let trips = Trip.find();
+      return res.send(trips);
   }
 
   exports.getTrip = (req, res) => {
@@ -14,5 +15,6 @@ var mongoose = require('mongoose'),
 
   exports.createTrip = (req, res) => {
       console.log('Create Trip')
+
       
   }
