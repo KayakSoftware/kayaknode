@@ -11,8 +11,11 @@ app.use(bodyParser.json());
 
 // mongoose instance connection url connection
 mongoose.Promise = global.Promise;
+
+console.log(`mongodb://${process.env.DB_HOST || 'localhost'}:32768/kayak_db`)
+
 mongoose
-    .connect(`mongodb://${process.env.DB_HOST || 'localhost'}:9999/tripdatabase`, { useUnifiedTopology: true, useNewUrlParser: true  })
+    .connect(`mongodb://${process.env.DB_HOST || 'localhost'}:32768/kayak_db`, { useUnifiedTopology: true, useNewUrlParser: true  })
     .catch(e => {
         console.error('Connection error', e.message)
     })

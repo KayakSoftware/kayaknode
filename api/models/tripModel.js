@@ -3,9 +3,9 @@ var Schema = mongoose.Schema;
 
 
 var TripSchema = new Schema({
-  user: {type:String, required:true},
-  id: {type: Number, required:true},
-
+  startTime: {type: Number, required:true},
+  tripStatus: {type: String, required: true}, // Active, Ended,
+  endTime: {type: Number, required:false}
 });
 
 module.exports = mongoose.model('trips', TripSchema);

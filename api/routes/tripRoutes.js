@@ -6,6 +6,9 @@ module.exports = function(app) {
     .post(trips.createTrip);
 
     app.route('/trips/:id')
-    .get(trips.getTrip);
+    .get(trips.getTrip)
+    .put(trips.endTrip);
 
+    app.route("/trips/:id/updateTripActivity")
+    .put(trips.updateTripActivity);
 };
