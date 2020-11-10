@@ -34,20 +34,22 @@ var mongoose = require('mongoose')
 
   exports.endTrip = async (req, res) => {
     console.log("endTrip")
-
+    console.log("req:", req.params)
     // Find document
     let { id } = req.params;
+    
     let document = await Trip.findById(id);
 
     // Set updates and save
     document.tripStatus = "Ended";
-    document.endTime = new Date().getTime()
+    document.endTime = new Date().getTime();
+    console.log(document)
     try {
       await document.save();
-      return true;
+      return res.send(true);
     } catch(err) {
       console.log(err)
-      return false;
+      return res.send(false);
     }
   }
 
