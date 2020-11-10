@@ -1,6 +1,8 @@
 var axios = require("axios")
 var mongoose = require('mongoose')
   Trip = mongoose.model('Trip');
+  Sink = mongoose.model('TripDataSink')
+  TripRoute = mongoose.model('TripRouteData')
 
   exports.getAllTrips = async (req, res) => {
       console.log("getAllTrips")
@@ -41,17 +43,82 @@ var mongoose = require('mongoose')
     let document = await Trip.findById(id);
 
     // Set updates and save
-    document.tripStatus = "Ended";
+    document.tripStatus = "Analyzing";
     document.endTime = new Date().getTime();
-    console.log(document)
+    
+    
     try {
       await document.save();
-      return res.send(true);
+      res.send(true);
+      processData(id);
+
     } catch(err) {
       console.log(err)
       return res.send(false);
     }
   }
+
+
+  processData = async (tripId) => {
+
+    // Find all routeData for current tripId.
+
+    var sinkData = await Sink.find({
+      tripId: tripId
+    })
+
+    if(sinkData.length === 0) {
+      console.log("Empty trip")
+      // Update with empty trip
+    }
+
+    // Sort the sinkData array according to createdAt timestamp
+    let sortedSink = sinkData.sort((a,b) => a.createdAt - b.createdAt);
+
+    let chronologicalCoordinates = [];
+
+    for(let i = 0; i < sortedSink.length; i++) {
+      let sink = sortedSink[i]
+      for(let j = 0; j < sink.data.length; j++) {
+        let data = sink.data[j];
+        for(let h = 0; h < data.coordinates.length; h++) {
+          chronologicalCoordinates.push({
+            timestamp: data.coordinates[h].timestamp,
+            activity: data.activity,
+            coords: data.coordinates[h].coords
+          })
+        }
+      }
+    }
+
+    /* Do calculations on total length, length in water, length on land etc.
+     * All post proceesing and stuff should be done here and when completed store the final result in 
+     * tripRouteDataModel. Also length and average speed calculations could be done here
+     */
+
+    // Store processed data in routeData
+    var result = await TripRoute.create({
+      tripId: tripId,
+      index: 0,
+      data: chronologicalCoordinates
+    })
+
+    // Remove all the tripData from the sink
+    var deleteResult = await Sink.deleteMany({tripId: tripId});
+    console.log(deleteResult);
+
+    // Set trip to stopped
+    let document = await Trip.findById(tripId);
+    document.tripStatus = "Stopped"
+    document.distanceTotal = 0;
+    document.averageSpeed = 0;
+    document.distanceWater = 0;
+    document.averageSpeedWater = 0;
+    document.distanceLand = 0;
+    document.averageSpeedLand = 0;
+    await document.save()
+  }
+
 
   exports.updateTripActivity = async (req, res) => {
     
@@ -82,7 +149,56 @@ var mongoose = require('mongoose')
       predictionResults.push(predictionResult)
     }
 
-    console.log(predictionResults)
-    
+    let highestConfidence = null;
+
+    for(let i = 0; i < predictionResults.length; i++) {
+      if(!highestConfidence) {
+        highestConfidence = predictionResults[i];
+        continue;
+      }
+
+      if(highestConfidence.confidence > predictionResults[i].confidence) {
+        highestConfidence = predictionResults[i];
+      }
+    }
+
+    let o = {
+      tripId: id,
+      createdAt: new Date().getTime(),
+      data: [{
+          activity: highestConfidence.activity,
+          coordinates: req.body.data.gpsData.map(gps => {
+            return {
+              timestamp: gps.location.timestamp,
+              coords: {
+                accuracy: gps.location.coords.accuracy,
+                altitude: gps.location.coords.altitude,
+                altitudeAccuracy: gps.location.coords.altitudeAccuracy,
+                heading: gps.location.coords.heading,
+                latitude: gps.location.coords.latitude,
+                longitude: gps.location.coords.longitude,
+                speed: gps.location.coords.speed
+              }
+            }
+          }),
+          accelerometerData: req.body.data.accelerometerData.map(data => {
+            return {
+              timestamp: data.timestamp,
+              x: data.accelerations.x,
+              y: data.accelerations.y,
+              z: data.accelerations.z
+            }
+          })
+        },
+      ]
+    }
+
+    // Update sink
+    try {
+      var sinkResult = Sink.create(o)
+    } catch (err) {
+      console.err(err);
+    }
+
     return res.send(predictionResults)
-  }
+ }
