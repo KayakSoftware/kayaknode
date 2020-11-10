@@ -1,7 +1,6 @@
-
 var axios = require("axios")
 var mongoose = require('mongoose')
-  Trip = mongoose.model('trips');
+  Trip = mongoose.model('Trip');
 
   exports.getAllTrips = async (req, res) => {
       console.log("getAllTrips")
@@ -31,7 +30,6 @@ var mongoose = require('mongoose')
     } catch (err) {
       return res.err(err)
     }
-
   }
 
   exports.endTrip = async (req, res) => {
@@ -68,11 +66,13 @@ var mongoose = require('mongoose')
       })
     }
 
-    var result = await axios.post("http://0.0.0.0:5000/predict", {
+    var result = await axios.post("http://127.0.0.1:5000/predict", {
       data: data
     })
 
     let predictionResults = []
+    console.log(predictionResults)
+
 
     for(let i = 0; i < result.data.predictions.length; i++) {
       let predictionResult = {

@@ -2,7 +2,9 @@ var express = require('express'),
   app = express(),
   port = 5555,
   mongoose = require('mongoose'),
-  Trip = require('./api/models/tripModel'), //created model loading here
+  Trip = require('./api/models/tripModel'), //created model loading here,
+  TripDataSink = require("./api/models/tripDataSinkModel"),
+  TripRouteData = require("./api/models/tripRouteDataModel")
   bodyParser = require('body-parser');
   
 
