@@ -60,9 +60,9 @@ var mongoose = require('mongoose')
 
     for(let i = 0; i < req.body.data.accelerometerData.length; i++) {
       data.push({
-        xAxis: req.body.data.accelerometerData[i].x,
-        yAxis: req.body.data.accelerometerData[i].y,
-        zAxis: req.body.data.accelerometerData[i].z
+        xAxis: req.body.data.accelerometerData[i].accelerations.x,
+        yAxis: req.body.data.accelerometerData[i].accelerations.y,
+        zAxis: req.body.data.accelerometerData[i].accelerations.z
       })
     }
 
@@ -71,8 +71,6 @@ var mongoose = require('mongoose')
     })
 
     let predictionResults = []
-    console.log(predictionResults)
-
 
     for(let i = 0; i < result.data.predictions.length; i++) {
       let predictionResult = {
@@ -81,6 +79,8 @@ var mongoose = require('mongoose')
       }
       predictionResults.push(predictionResult)
     }
+
+    console.log(predictionResults)
     
     return res.send(predictionResults)
   }
