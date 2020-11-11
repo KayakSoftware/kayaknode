@@ -16,8 +16,24 @@ var mongoose = require('mongoose')
       let {id} = req.params;
 
       let document = await Trip.findById(id);
+      let routeData = await TripRoute.find({
+        tripId: id
+      })
 
-      return res.send(document);
+      let coordinates = []
+
+      for(let i = 0; i < routeData.length; i++) {
+        for(let j = 0; j< routeData[i].data.length; j++) {
+          coordinates.push(routeData[i].data[j])
+        }
+      }
+
+      console.log(coordinates)
+
+      return res.send({
+        trip: document,
+        coordinates: coordinates
+      });
   }
 
   exports.createTrip = async (req, res) => {
